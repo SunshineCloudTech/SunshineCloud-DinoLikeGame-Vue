@@ -98,11 +98,6 @@ jobs:
         
         echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-    - name: Update package.json
-      run: |
-        npm version ${{ steps.version.outputs.version }} --no-git-tag-version
-        echo "Updated package.json to version ${{ steps.version.outputs.version }}"
-
     - name: Type check
       run: |
         echo "🔍 Running TypeScript type check..."
