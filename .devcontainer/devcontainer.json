@@ -24,8 +24,8 @@
 		}
 	},
 
-	// Set workspace folder
-	"workspaceFolder": "/workspace",
+	// Set workspace folder (compatible with Codespaces)
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
 	// Forward ports for development server
 	"forwardPorts": [5173, 4173],
@@ -41,7 +41,7 @@
 	},
 
 	// Install dependencies and setup development environment
-	"postCreateCommand": "bash .devcontainer/scripts/setup.sh",
+	"postCreateCommand": "cd ${containerWorkspaceFolder} && if [ -f .devcontainer/scripts/setup.sh ]; then bash .devcontainer/scripts/setup.sh; else npm install; fi",
 
 	// VS Code customizations
 	"customizations": {
@@ -86,6 +86,12 @@
 				}
 			}
 		}
+	},
+
+	// Environment variables for development
+	"containerEnv": {
+		"NODE_ENV": "development",
+		"VITE_DEV_SERVER_HOST": "0.0.0.0"
 	},
 
 	// Use non-root user

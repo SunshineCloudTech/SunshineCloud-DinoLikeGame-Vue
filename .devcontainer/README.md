@@ -92,4 +92,55 @@ src/
 3. **类型安全**: TypeScript提供完整类型支持
 4. **组件化**: 模块化设计，易于维护和扩展
 
-Happy coding! 🎮✨
+## 🚨 故障排除 (Troubleshooting)
+
+### DevContainer启动失败
+
+如果遇到devcontainer启动问题，请尝试以下解决方案：
+
+#### 1. 工作目录问题
+```bash
+Error: chdir to cwd ("/workspace") failed: no such file or directory
+```
+
+**解决方案**:
+- 确保使用最新的devcontainer配置
+- workspaceFolder已设置为 `/workspaces/${localWorkspaceFolderBasename}`
+
+#### 2. postCreateCommand失败
+```bash
+postCreateCommand failed with exit code 126
+```
+
+**解决方案**:
+1. 使用简化配置：重命名 `devcontainer.simple.json` 为 `devcontainer.json`
+2. 手动运行安装：在容器中执行 `npm install`
+3. 检查脚本权限：确保 `setup.sh` 具有执行权限
+
+#### 3. 权限问题
+如果遇到权限相关错误：
+```bash
+# 在容器中运行
+sudo chown -R node:node /workspaces
+chmod +x .devcontainer/scripts/setup.sh
+```
+
+#### 4. 网络问题
+如果npm安装失败：
+```bash
+# 清理npm缓存
+npm cache clean --force
+# 重新安装
+npm install
+```
+
+### 🔧 快速修复
+
+如果主配置文件出现问题，使用备用配置：
+```bash
+# 重命名当前配置
+mv devcontainer.json devcontainer.json.backup
+# 使用简化配置
+mv devcontainer.simple.json devcontainer.json
+# 重建容器
+```
