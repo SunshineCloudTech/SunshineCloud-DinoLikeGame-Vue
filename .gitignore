@@ -9,9 +9,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+# Note: package-lock.json should be committed for consistent dependency resolution
+# package-lock.json  # Uncommented to allow tracking
+# yarn.lock          # Keep if using yarn
+# pnpm-lock.yaml     # Keep if using pnpm
 
 # Build Outputs & Distribution
 dist/
