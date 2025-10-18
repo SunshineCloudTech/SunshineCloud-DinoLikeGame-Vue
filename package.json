@@ -1,0 +1,54 @@
+{
+  "name": "dinolike-game",
+  "version": "25.10.18",
+  "description": "Professional Vue 3 & TypeScript implementation of the classic Chrome offline runner game with charming pixel art character",
+  "author": {
+    "name": "Vue Runner Game Team",
+    "email": "team@vue-runner-game.com"
+  },
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SunshineCloudTech/SunshineCloud-DinoLikeGame-Vue.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SunshineCloudTech/SunshineCloud-DinoLikeGame-Vue/issues"
+  },
+  "keywords": [
+    "vue3",
+    "typescript",
+    "game",
+    "html5-canvas",
+    "pixel-art",
+    "runner-game",
+    "chrome-dino",
+    "vite",
+    "composition-api",
+    "browser-game"
+  ],
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview --host",
+    "type-check": "vue-tsc --noEmit",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "format": "prettier --write src/",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "clean": "rimraf dist node_modules",
+    "analyze": "npx vite-bundle-analyzer"
+  },
+  "dependencies": {
+    "vue": "^3.5.22"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/tsconfig": "^0.8.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.1.7",
+    "vue-tsc": "^3.1.0"
+  }
+}

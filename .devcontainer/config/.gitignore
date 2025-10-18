@@ -1,13 +1,17 @@
-# Compiled class file
-*.class
+# Devcontainer specific ignores
+.devcontainer/tmp/
+.devcontainer/logs/
+.devcontainer/cache/
 
-# Log file
+# VS Code settings that might be generated
+.vscode/settings.json.backup
+
+# Development artifacts
 *.log
+*.tmp
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
+# Node.js dependencies (if accidentally created in devcontainer)
+node_modules/
 .mtj.tmp/
 
 # Package Files #

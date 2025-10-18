@@ -1,0 +1,245 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Custom version (e.g., 1.2.3) or leave empty for auto-increment'
+        required: false
+        type: string
+      release_type:
+        description: 'Auto-increment type (if version is empty)'
+        required: false
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+      release_notes:
+        description: 'Custom release notes (optional)'
+        required: false
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  manual-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Determine version
+      id: version
+      run: |
+        CUSTOM_VERSION="${{ github.event.inputs.version }}"
+        
+        if [[ -n "$CUSTOM_VERSION" ]]; then
+          # Use custom version
+          NEW_VERSION="$CUSTOM_VERSION"
+          echo "Using custom version: $NEW_VERSION"
+        else
+          # Auto-increment version
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          case $RELEASE_TYPE in
+            "major")
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            "minor")
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            "patch")
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "Auto-incremented version ($RELEASE_TYPE): $NEW_VERSION"
+        fi
+        
+        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+    - name: Update package.json
+      run: |
+        npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+        echo "Updated package.json to version ${{ steps.version.outputs.version }}"
+
+    - name: Build application
+      run: |
+        npm run build
+        echo "✅ Build completed successfully"
+
+    - name: Create release package
+      run: |
+        # Create release directory
+        mkdir -p manual-release-package
+        
+        # Copy built files
+        cp -r dist/ manual-release-package/
+        
+        # Copy project files
+        cp package.json manual-release-package/
+        cp README.md manual-release-package/ 2>/dev/null || echo "README.md not found"
+        cp LICENSE manual-release-package/ 2>/dev/null || echo "LICENSE not found"
+        
+        # Create manual release info
+        cat > manual-release-package/RELEASE_INFO.md << EOF
+        # Manual Release v${{ steps.version.outputs.version }}
+        
+        **Release Date**: $(date '+%Y-%m-%d %H:%M:%S UTC')
+        **Release Type**: Manual Deployment
+        **Triggered By**: ${{ github.actor }}
+        **Workflow Run**: ${{ github.run_id }}
+        **Commit**: ${{ github.sha }}
+        
+        ## Release Configuration
+        - **Custom Version**: ${{ github.event.inputs.version || 'Auto-generated' }}
+        - **Release Type**: ${{ github.event.inputs.release_type || 'N/A' }}
+        - **Pre-release**: ${{ github.event.inputs.prerelease }}
+        
+        ## Custom Notes
+        ${{ github.event.inputs.release_notes || 'No custom release notes provided.' }}
+        
+        ---
+        
+        This is a manually triggered release of the Vue Dino Game.
+        EOF
+        
+        # Create ZIP
+        cd manual-release-package
+        zip -r "../vue-dino-manual-v${{ steps.version.outputs.version }}.zip" .
+        cd ..
+
+    - name: Generate release notes
+      id: notes
+      run: |
+        CUSTOM_NOTES="${{ github.event.inputs.release_notes }}"
+        
+        cat > release_notes.md << 'EOF'
+        ## 🎮 Vue 3 Chrome Dino Game - Manual Release v${{ steps.version.outputs.version }}
+        
+        **Manual Release Deployment** - Triggered by @${{ github.actor }}
+        
+        ### 📋 Release Information
+        - **Version**: v${{ steps.version.outputs.version }}
+        - **Release Date**: $(date '+%Y-%m-%d %H:%M:%S UTC')
+        - **Build Status**: ✅ Successful
+        - **Deployment Type**: Manual Trigger
+        EOF
+        
+        if [[ -n "$CUSTOM_NOTES" ]]; then
+          cat >> release_notes.md << EOF
+        
+        ### 📝 Custom Release Notes
+        $CUSTOM_NOTES
+        EOF
+        fi
+        
+        cat >> release_notes.md << 'EOF'
+        
+        ### 🎯 Game Features
+        - **Chrome Dino Recreation**: Faithful implementation of the classic game
+        - **Vue 3 + TypeScript**: Modern framework with type safety
+        - **Responsive Design**: Works on desktop and mobile devices
+        - **Canvas Rendering**: Smooth 60fps performance
+        - **Pixel Art Style**: Custom designed character and environment
+        - **Multiple Controls**: Keyboard (spacebar/up arrow) and touch support
+        - **Score System**: Real-time scoring with persistence
+        - **Theme Support**: Day/night mode toggle
+        
+        ### 🚀 Quick Deployment
+        1. Download the ZIP file below
+        2. Extract to your web server directory
+        3. Serve the `dist/` folder contents
+        4. Access via web browser and start playing!
+        
+        ### 🌐 Hosting Compatibility
+        - ✅ Static hosting (Netlify, Vercel, GitHub Pages)
+        - ✅ CDN platforms (CloudFront, Azure Static Web Apps)
+        - ✅ Traditional servers (Apache, Nginx)
+        - ✅ Container platforms (Docker, Kubernetes)
+        
+        ### 📱 Browser Support
+        - Chrome/Chromium (recommended)
+        - Firefox
+        - Safari
+        - Microsoft Edge
+        - Mobile browsers
+        
+        ---
+        
+        **Technical Details**
+        - Build Tool: Vite
+        - Framework: Vue 3 Composition API
+        - Language: TypeScript
+        - Graphics: HTML5 Canvas
+        
+        Ready to deploy and play! 🦕✨
+        EOF
+        
+        echo "Release notes generated successfully"
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        release_name: Vue Dino Game v${{ steps.version.outputs.version }} (Manual)
+        body_path: release_notes.md
+        draft: false
+        prerelease: ${{ github.event.inputs.prerelease }}
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./vue-dino-manual-v${{ steps.version.outputs.version }}.zip
+        asset_name: vue-dino-manual-v${{ steps.version.outputs.version }}.zip
+        asset_content_type: application/zip
+
+    - name: Summary
+      run: |
+        echo "🎉 Manual release completed successfully!"
+        echo ""
+        echo "📋 Release Details:"
+        echo "   • Version: v${{ steps.version.outputs.version }}"
+        echo "   • Type: Manual Release"
+        echo "   • Pre-release: ${{ github.event.inputs.prerelease }}"
+        echo "   • Triggered by: ${{ github.actor }}"
+        echo ""
+        echo "🔗 Release URL: ${{ steps.create_release.outputs.html_url }}"
+        echo "📦 Download: vue-dino-manual-v${{ steps.version.outputs.version }}.zip"
+        echo ""
+        echo "✅ Ready for deployment!"

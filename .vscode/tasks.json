@@ -1,0 +1,105 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Install Dependencies",
+			"type": "shell",
+			"command": "npm install",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Dev Server",
+			"type": "shell",
+			"command": "npm run dev",
+			"isBackground": true,
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": [
+				{
+					"pattern": [
+						{
+							"regexp": ".",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					],
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": ".",
+						"endsPattern": "."
+					}
+				}
+			]
+		},
+		{
+			"label": "Build for Production",
+			"type": "shell",
+			"command": "npm run build",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Preview Production Build",
+			"type": "shell",
+			"command": "npm run preview",
+			"isBackground": true,
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": [],
+			"dependsOn": "Build for Production"
+		},
+		{
+			"label": "Clean and Reinstall",
+			"type": "shell",
+			"command": "rm -rf node_modules package-lock.json && npm install",
+			"windows": {
+				"command": "Remove-Item -Recurse -Force node_modules, package-lock.json -ErrorAction SilentlyContinue; npm install"
+			},
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		}
+	]
+}

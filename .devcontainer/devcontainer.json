@@ -1,51 +1,93 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/java
+// Vue3 TypeScript Chrome Dino Game Development Container
 {
-	"name": "temp",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	// "image": "sunshinecloud007/base-bookworm:lite",
-	"build": {
-		"dockerfile": "Dockerfile",
-		// Use 'context' to specify the build context. More info: https://aka.ms/devcontainers-dockerfile#context
-		"context": ".",
-		// Use 'args' to pass build arguments. More info: https://aka.ms/devcontainers-dockerfile#args
-		"args": {
-			// "VARIANT": "8"
-		}
-	},
+	"name": "Vue3 Dino Game Dev Environment",
+	
+	// Use the official Node.js dev container image  
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bookworm",
+	
+	// Features to install in the container
 	"features": {
-		"ghcr.io/devcontainers/features/java:1": {
-			"installGradle": true,
-			"installMaven": true,
-			"installAnt": true,
-			"installGroovy": true,
-			"version": "8",
-			"jdkDistro": "tem",
-			"gradleVersion": "latest",
-			"mavenVersion": "3.9.10",
-			"antVersion": "latest",
-			"groovyVersion": "latest"
-		},
 		"ghcr.io/devcontainers/features/node:1": {
 			"nodeGypDependencies": true,
 			"installYarnUsingApt": true,
-			"version": "lts",
+			"version": "20",
 			"pnpmVersion": "latest",
 			"nvmVersion": "latest"
+		},
+		"ghcr.io/devcontainers/features/git:1": {
+			"ppa": true,
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {
+			"installDirectlyFromGitHubRelease": true,
+			"version": "latest"
 		}
 	},
-	"workspaceMount": "source=${localWorkspaceFolder},target=/SunshineCloud/temp-Git,type=bind,consistency=cached",
-	"workspaceFolder": "/SunshineCloud/temp-Git",
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	// Set workspace folder
+	"workspaceFolder": "/workspace",
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "sudo service supervisor start && sudo service dbus start && bash",
+	// Forward ports for development server
+	"forwardPorts": [5173, 4173],
+	"portsAttributes": {
+		"5173": {
+			"label": "Vite Dev Server",
+			"onAutoForward": "notify"
+		},
+		"4173": {
+			"label": "Vite Preview Server",
+			"onAutoForward": "notify"
+		}
+	},
 
-	// Configure tool-specific properties.
-	// "customizations": {},
+	// Install dependencies and setup development environment
+	"postCreateCommand": "bash .devcontainer/scripts/setup.sh",
 
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	"remoteUser": "matrix0523"
+	// VS Code customizations
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"Vue.volar",
+				"Vue.vscode-typescript-vue-plugin",
+				"esbenp.prettier-vscode",
+				"dbaeumer.vscode-eslint",
+				"formulahendry.auto-rename-tag",
+				"christian-kohler.path-intellisense",
+				"aaron-bond.better-comments",
+				"usernamehw.errorlens",
+				"ms-vscode.vscode-typescript-next"
+			],
+			"settings": {
+				"editor.formatOnSave": true,
+				"editor.defaultFormatter": null,
+				"[javascript]": {
+					"editor.defaultFormatter": "vscode.typescript-language-features"
+				},
+				"[typescript]": {
+					"editor.defaultFormatter": "vscode.typescript-language-features"
+				},
+				"[vue]": {
+					"editor.defaultFormatter": "Vue.volar"
+				},
+				"[json]": {
+					"editor.defaultFormatter": "vscode.json-language-features"
+				},
+				"editor.codeActionsOnSave": {
+					"source.fixAll.eslint": "explicit"
+				},
+				"typescript.preferences.includePackageJsonAutoImports": "auto",
+				"vue.server.hybridMode": true,
+				"emmet.includeLanguages": {
+					"vue-html": "html",
+					"vue": "html"
+				},
+				"files.associations": {
+					"*.vue": "vue"
+				}
+			}
+		}
+	},
+
+	// Use non-root user
+	"remoteUser": "node"
 }
